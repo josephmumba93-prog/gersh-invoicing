@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gersh Elite Motors - Invoicing</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.1.0/iconfont/tabler-icons.min.css">
+<style>
+  :root{
+    --bg-primary:#ffffff;
+    --bg-secondary:#f4f3f0;
+    --bg-tertiary:#ebe9e4;
+    --bg-info:#E6F1FB;
+    --bg-success:#EAF3DE;
+    --bg-warning:#FAEEDA;
+    --text-primary:#1a1a1a;
+    --text-secondary:#5f5e5a;
+    --text-tertiary:#888780;
+    --text-info:#0C447C;
+    --text-success:#27500A;
+    --text-warning:#854F0B;
+    --border-tertiary:rgba(0,0,0,0.1);
+    --border-secondary:rgba(0,0,0,0.2);
+    --border-info:#378ADD;
+    --border-success:#639922;
+    --border-warning:#EF9F27;
+    --radius-md:8px;
+    --radius-lg:12px;
+    --font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:var(--font-sans);
+    background:var(--bg-tertiary);
+    color:var(--text-primary);
+    line-height:1.5;
+  }
+  #app-shell{
+    max-width:880px;
+    margin:0 auto;
+    padding:24px 16px 64px;
+  }
+  header.brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:20px;
+  }
+  header.brand h1{
+    font-size:18px;
+    font-weight:600;
+    margin:0;
+  }
+  .tabs{
+    display:flex;
+    gap:8px;
+    margin-bottom:20px;
+    border-bottom:1px solid var(--border-tertiary);
+  }
+  .tabbtn{
+    border:none;
+    border-bottom:2px solid transparent;
+    border-radius:0;
+    background:transparent;
+    padding:10px 4px;
+    margin-right:20px;
+    font-size:14px;
+    color:var(--text-secondary);
+    cursor:pointer;
+    font-family:inherit;
+  }
+  .tabbtn.active{
+    border-bottom-color:var(--border-info);
+    color:var(--text-info);
+    font-weight:500;
+  }
+  input, select, textarea{
+    font-family:inherit;
+    font-size:14px;
+    padding:8px 10px;
+    border-radius:var(--radius-md);
+    border:1px solid var(--border-tertiary);
+    background:var(--bg-primary);
+    color:var(--text-primary);
+    width:100%;
+  }
+  input:focus, select:focus, textarea:focus{
+    outline:none;
+    border-color:var(--border-info);
+    box-shadow:0 0 0 2px rgba(55,138,221,0.15);
+  }
+  button{
+    font-family:inherit;
+    font-size:14px;
+    padding:8px 14px;
+    border-radius:var(--radius-md);
+    border:1px solid var(--border-tertiary);
+    background:var(--bg-primary);
+    color:var(--text-primary);
+    cursor:pointer;
+  }
+  button:hover{
+    background:var(--bg-secondary);
+  }
+  button:active{
+    transform:scale(0.98);
+  }
+  button.primary{
+    background:var(--text-info);
+    color:#fff;
+    border-color:var(--text-info);
+  }
+  button.primary:hover{
+    background:#0a3a68;
+  }
+  .card{
+    background:var(--bg-primary);
+    border:1px solid var(--border-tertiary);
+    border-radius:var(--radius-lg);
+    padding:20px;
+  }
+  label.field-label{
+    font-size:13px;
+    color:var(--text-secondary);
+    display:block;
+    margin-bottom:4px;
+  }
+  .metric-card{
+    background:var(--bg-secondary);
+    border-radius:var(--radius-md);
+    padding:16px;
+  }
+  .metric-label{
+    font-size:13px;
+    color:var(--text-secondary);
+    margin:0 0 6px;
+  }
+  .metric-value{
+    font-size:22px;
+    font-weight:500;
+    margin:0;
+  }
+  .status-pill{
+    font-size:12px;
+    padding:5px 10px;
+    border-radius:var(--radius-md);
+    border:1px solid;
+    cursor:pointer;
+    font-family:inherit;
+  }
+  .status-pill.paid{
+    border-color:var(--border-success);
+    background:var(--bg-success);
+    color:var(--text-success);
+  }
+  .status-pill.unpaid{
+    border-color:var(--border-warning);
+    background:var(--bg-warning);
+    color:var(--text-warning);
+  }
+  #printable{
+    background:#fff;
+    color:#1a1a1a;
+  }
+  @media print{
+    body *{ visibility:hidden; }
+    #printable, #printable *{ visibility:visible; }
+    #printable{ position:absolute; left:0; top:0; width:100%; border:none; padding:0; }
+  }
+</style>
+</head>
+<body>
+<div id="app-shell">
+  <header class="brand">
+    <i class="ti ti-car" style="font-size:22px;color:var(--text-info)" aria-hidden="true"></i>
+    <h1>Gersh Elite Motors &mdash; Invoicing</h1>
+  </header>
+
+  <div class="tabs">
+    <button id="tab-create" class="tabbtn active">New invoice</button>
+    <button id="tab-list" class="tabbtn">All invoices</button>
+    <button id="tab-dash" class="tabbtn">Dashboard</button>
+  </div>
+
+  <div id="view-create"></div>
+  <div id="view-list" style="display:none"></div>
+  <div id="view-dash" style="display:none"></div>
+  <div id="view-print" style="display:none"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+(function(){
+  const COMPANY = {
+    name: "GERSH ELITE MOTORS LTD",
+    address: "55 road Makeni, Lusaka",
+    phone: "+260978990389",
+    email: "sirgershom8@gmail.com"
+  };
+  const PREFIX = "GEM-";
+  const STORAGE_KEY = "gersh_invoices_v1";
+
+  let invoices = [];
+  let nextNo = 126;
+  let lineCounter = 0;
+
+  function fmtK(n){ return "K" + (Math.round(n*100)/100).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  function fmtDate(d){ if(!d) return ""; const dt=new Date(d); if(isNaN(dt)) return d; return dt.toLocaleDateString('en-GB'); }
+  function todayISO(){ return new Date().toISOString().slice(0,10); }
+  function uid(){ return 'inv_'+Date.now()+'_'+Math.floor(Math.random()*10000); }
+  function formatInvNo(n){ return PREFIX + n; }
+  function parseInvNoNumber(str){
+    if(!str) return NaN;
+    const m = String(str).match(/(\d+)\s*$/);
+    return m ? parseInt(m[1]) : NaN;
+  }
+
+  function loadAll(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        const data = JSON.parse(raw);
+        invoices = data.invoices || [];
+        nextNo = data.nextNo || 126;
+      }
+    }catch(e){ invoices = []; nextNo = 126; }
+  }
+  function saveAll(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({invoices, nextNo}));
+    }catch(e){ console.error('save failed', e); alert('Could not save data in this browser. Storage may be full or disabled.'); }
+  }
+
+  function switchTab(tab){
+    ['create','list','dash'].forEach(t=>{
+      document.getElementById('view-'+t).style.display = (t===tab)?'':'none';
+      document.getElementById('tab-'+t).classList.toggle('active', t===tab);
+    });
+    document.getElementById('view-print').style.display='none';
+  }
+  document.getElementById('tab-create').onclick = ()=>{ renderCreate(); switchTab('create'); };
+  document.getElementById('tab-list').onclick = ()=>{ renderList(); switchTab('list'); };
+  document.getElementById('tab-dash').onclick = ()=>{ renderDash(); switchTab('dash'); };
+
+  // ---------- CREATE VIEW ----------
+  function blankLine(){
+    lineCounter++;
+    return {id:'l'+lineCounter, desc:'', rate:'', unit:'' };
+  }
+
+  let draftLines = [];
+
+  function renderCreate(){
+    draftLines = [blankLine(), blankLine(), blankLine()];
+    const el = document.getElementById('view-create');
+    el.innerHTML = `
+      <div class="card">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+          <div>
+            <label class="field-label">Client name</label>
+            <input id="f-client" type="text" placeholder="MR KENNEDY CHIYANDA">
+          </div>
+          <div>
+            <label class="field-label">Client address</label>
+            <input id="f-address" type="text" placeholder="MONGU, ZAMBIA">
+          </div>
+          <div>
+            <label class="field-label">Client phone</label>
+            <input id="f-phone" type="text" placeholder="optional">
+          </div>
+          <div>
+            <label class="field-label">Invoice date</label>
+            <input id="f-date" type="date" value="${todayISO()}">
+          </div>
+          <div>
+            <label class="field-label">Due date</label>
+            <input id="f-due" type="date">
+          </div>
+          <div>
+            <label class="field-label">Invoice no</label>
+            <input id="f-invno" type="text" value="${formatInvNo(nextNo)}">
+          </div>
+        </div>
+
+        <div style="border-top:1px solid var(--border-tertiary);padding-top:14px;margin-bottom:8px">
+          <div style="display:grid;grid-template-columns:1fr 90px 110px 110px 32px;gap:8px;font-size:12px;color:var(--text-secondary);margin-bottom:6px">
+            <div>Description</div><div>Rate</div><div>Unit price K</div><div>Total K</div><div></div>
+          </div>
+          <div id="lines-container"></div>
+          <button id="add-line" style="margin-top:8px;font-size:13px"><i class="ti ti-plus" style="font-size:14px;vertical-align:-2px;margin-right:4px" aria-hidden="true"></i>Add line</button>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid var(--border-tertiary)">
+          <div style="text-align:right">
+            <p style="font-size:13px;color:var(--text-secondary);margin:0 0 4px">Grand total</p>
+            <p style="font-size:24px;font-weight:500;margin:0" id="grand-total-display">K0.00</p>
+          </div>
+        </div>
+
+        <div style="margin-top:16px">
+          <label class="field-label">Terms &amp; instructions (optional)</label>
+          <textarea id="f-terms" rows="2" style="resize:vertical" placeholder="Payment instructions, warranty, returns policy..."></textarea>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:18px">
+          <button id="save-invoice-btn" class="primary"><i class="ti ti-check" style="font-size:15px;vertical-align:-2px;margin-right:5px" aria-hidden="true"></i>Save invoice</button>
+        </div>
+      </div>
+    `;
+    document.getElementById('f-due').valueAsDate = new Date(Date.now()+14*86400000);
+    renderLines();
+    document.getElementById('add-line').onclick = ()=>{ draftLines.push(blankLine()); renderLines(); };
+    document.getElementById('save-invoice-btn').onclick = saveInvoice;
+  }
+
+  function calcLineTotal(line){
+    const r = parseFloat(line.rate)||0;
+    const u = parseFloat(line.unit)||0;
+    return r*u;
+  }
+
+  function renderLines(){
+    const c = document.getElementById('lines-container');
+    c.innerHTML = draftLines.map(line=>`
+      <div style="display:grid;grid-template-columns:1fr 90px 110px 110px 32px;gap:8px;margin-bottom:6px" data-row="${line.id}">
+        <input type="text" class="ln-desc" data-id="${line.id}" value="${line.desc.replace(/"/g,'&quot;')}" placeholder="Item description">
+        <input type="number" class="ln-rate" data-id="${line.id}" value="${line.rate}" step="any">
+        <input type="number" class="ln-unit" data-id="${line.id}" value="${line.unit}" step="any">
+        <div style="display:flex;align-items:center;font-size:14px;padding:0 4px" class="ln-total">${fmtK(calcLineTotal(line))}</div>
+        <button class="ln-remove" data-id="${line.id}" aria-label="Remove line" style="padding:0;width:32px;height:32px;display:flex;align-items:center;justify-content:center"><i class="ti ti-x" style="font-size:14px" aria-hidden="true"></i></button>
+      </div>
+    `).join('');
+
+    c.querySelectorAll('.ln-desc').forEach(inp=>inp.oninput = e=>{ findLine(e.target.dataset.id).desc = e.target.value; });
+    c.querySelectorAll('.ln-rate').forEach(inp=>inp.oninput = e=>{ findLine(e.target.dataset.id).rate = e.target.value; updateRowTotal(e.target.dataset.id); updateGrandTotal(); });
+    c.querySelectorAll('.ln-unit').forEach(inp=>inp.oninput = e=>{ findLine(e.target.dataset.id).unit = e.target.value; updateRowTotal(e.target.dataset.id); updateGrandTotal(); });
+    c.querySelectorAll('.ln-remove').forEach(btn=>btn.onclick = e=>{
+      const id = e.currentTarget.dataset.id;
+      draftLines = draftLines.filter(l=>l.id!==id);
+      renderLines();
+      updateGrandTotal();
+    });
+    updateGrandTotal();
+  }
+  function findLine(id){ return draftLines.find(l=>l.id===id); }
+  function updateRowTotal(id){
+    const line = findLine(id);
+    const row = document.querySelector(`[data-row="${id}"] .ln-total`);
+    if(row) row.textContent = fmtK(calcLineTotal(line));
+  }
+  function updateGrandTotal(){
+    const total = draftLines.reduce((s,l)=>s+calcLineTotal(l),0);
+    const disp = document.getElementById('grand-total-display');
+    if(disp) disp.textContent = fmtK(total);
+  }
+
+  function saveInvoice(){
+    const client = document.getElementById('f-client').value.trim();
+    if(!client){ alert('Please enter a client name.'); return; }
+    let invoiceNo = document.getElementById('f-invno').value.trim();
+    if(!invoiceNo) invoiceNo = formatInvNo(nextNo);
+    const items = draftLines.filter(l=>l.desc.trim()!=='' || calcLineTotal(l)>0).map(l=>({
+      desc:l.desc, rate:parseFloat(l.rate)||0, unit:parseFloat(l.unit)||0, total: calcLineTotal(l)
+    }));
+    const grandTotal = items.reduce((s,i)=>s+i.total,0);
+
+    const inv = {
+      id: uid(),
+      invoiceNo,
+      client,
+      address: document.getElementById('f-address').value.trim(),
+      phone: document.getElementById('f-phone').value.trim(),
+      date: document.getElementById('f-date').value || todayISO(),
+      due: document.getElementById('f-due').value || '',
+      items,
+      grandTotal,
+      terms: document.getElementById('f-terms').value.trim(),
+      status: 'unpaid',
+      createdAt: new Date().toISOString()
+    };
+    invoices.unshift(inv);
+    const parsedNum = parseInvNoNumber(invoiceNo);
+    if(!isNaN(parsedNum) && parsedNum >= nextNo) nextNo = parsedNum + 1;
+    saveAll();
+    openPrintView(inv.id);
+  }
+
+  // ---------- LIST VIEW ----------
+  function renderList(){
+    const el = document.getElementById('view-list');
+    if(invoices.length===0){
+      el.innerHTML = `<div style="text-align:center;padding:48px 0;color:var(--text-secondary);font-size:14px">No invoices yet. Create your first one in the "New invoice" tab.</div>`;
+      return;
+    }
+    el.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${invoices.map(inv=>`
+          <div class="card" style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px" data-inv="${inv.id}">
+            <div style="min-width:0">
+              <p style="margin:0;font-size:14px;font-weight:500">Invoice ${inv.invoiceNo} &middot; ${inv.client}</p>
+              <p style="margin:2px 0 0;font-size:12px;color:var(--text-secondary)">${fmtDate(inv.date)} &middot; ${fmtK(inv.grandTotal)}</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+              <button class="status-pill ${inv.status}" data-id="${inv.id}">${inv.status==='paid'?'Paid':'Unpaid'}</button>
+              <button class="view-btn" data-id="${inv.id}" aria-label="View invoice"><i class="ti ti-eye" style="font-size:15px;vertical-align:-2px" aria-hidden="true"></i></button>
+              <button class="del-btn" data-id="${inv.id}" aria-label="Delete invoice"><i class="ti ti-trash" style="font-size:15px;vertical-align:-2px" aria-hidden="true"></i></button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    el.querySelectorAll('.status-pill').forEach(btn=>btn.onclick = e=>{
+      const id = e.currentTarget.dataset.id;
+      const inv = invoices.find(i=>i.id===id);
+      inv.status = inv.status==='paid' ? 'unpaid' : 'paid';
+      saveAll();
+      renderList();
+    });
+    el.querySelectorAll('.view-btn').forEach(btn=>btn.onclick = e=> openPrintView(e.currentTarget.dataset.id));
+    el.querySelectorAll('.del-btn').forEach(btn=>btn.onclick = e=>{
+      const id = e.currentTarget.dataset.id;
+      if(confirm('Delete this invoice? This cannot be undone.')){
+        invoices = invoices.filter(i=>i.id!==id);
+        saveAll();
+        renderList();
+      }
+    });
+  }
+
+  // ---------- PRINT VIEW ----------
+  function openPrintView(id){
+    const inv = invoices.find(i=>i.id===id);
+    if(!inv) return;
+    ['create','list','dash'].forEach(t=>document.getElementById('view-'+t).style.display='none');
+    const el = document.getElementById('view-print');
+    el.style.display = '';
+    el.innerHTML = `
+      <div style="margin-bottom:14px;display:flex;gap:10px">
+        <button id="back-btn"><i class="ti ti-arrow-left" style="font-size:14px;vertical-align:-2px;margin-right:4px" aria-hidden="true"></i>Back</button>
+        <button id="print-btn" class="primary"><i class="ti ti-printer" style="font-size:14px;vertical-align:-2px;margin-right:4px" aria-hidden="true"></i>Print / save as PDF</button>
+      </div>
+      <div id="printable" class="card" style="padding:32px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px">
+          <div>
+            <h2 style="margin:0 0 6px;font-size:20px;font-weight:500;color:#1a1a1a">${COMPANY.name}</h2>
+            <p style="margin:0;font-size:12px;color:#555">${COMPANY.address}</p>
+            <p style="margin:0;font-size:12px;color:#555">${COMPANY.phone}</p>
+            <p style="margin:0;font-size:12px;color:#555">${COMPANY.email}</p>
+          </div>
+          <div style="text-align:right">
+            <p style="margin:0;font-size:18px;font-weight:500;color:#1a1a1a">Invoice ${inv.invoiceNo}</p>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:20px;border-top:1px solid #ddd;border-bottom:1px solid #ddd;padding:14px 0">
+          <div>
+            <p style="margin:0 0 4px;font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.5px">Bill to</p>
+            <p style="margin:0;font-size:14px;font-weight:500;color:#1a1a1a">${inv.client}</p>
+            ${inv.address?`<p style="margin:2px 0 0;font-size:12px;color:#555">${inv.address}</p>`:''}
+            ${inv.phone?`<p style="margin:2px 0 0;font-size:12px;color:#555">${inv.phone}</p>`:''}
+          </div>
+          <div style="text-align:right">
+            <p style="margin:0 0 4px;font-size:12px;color:#555">Invoice date: ${fmtDate(inv.date)}</p>
+            <p style="margin:0;font-size:12px;color:#555">Due date: ${fmtDate(inv.due)||'-'}</p>
+          </div>
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px">
+          <thead>
+            <tr style="border-bottom:1px solid #ccc">
+              <th style="text-align:left;padding:8px 4px;color:#555;font-weight:500">Description</th>
+              <th style="text-align:right;padding:8px 4px;color:#555;font-weight:500">Rate $</th>
+              <th style="text-align:right;padding:8px 4px;color:#555;font-weight:500">Unit price K</th>
+              <th style="text-align:right;padding:8px 4px;color:#555;font-weight:500">Total K</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${inv.items.map(it=>`
+              <tr style="border-bottom:1px solid #eee">
+                <td style="padding:8px 4px;color:#1a1a1a">${it.desc}</td>
+                <td style="padding:8px 4px;text-align:right;color:#1a1a1a">${it.rate?it.rate.toLocaleString():''}</td>
+                <td style="padding:8px 4px;text-align:right;color:#1a1a1a">${it.unit?it.unit.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):''}</td>
+                <td style="padding:8px 4px;text-align:right;color:#1a1a1a">${it.total.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:20px">
+          <div style="text-align:right">
+            <p style="margin:0;font-size:12px;color:#555">Grand total</p>
+            <p style="margin:2px 0 0;font-size:20px;font-weight:500;color:#1a1a1a">${fmtK(inv.grandTotal)}</p>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:20px">
+          <span style="font-size:12px;padding:4px 12px;border-radius:4px;background:${inv.status==='paid'?'#eaf3de':'#faeeda'};color:${inv.status==='paid'?'#27500a':'#854f0b'}">${inv.status==='paid'?'PAID':'UNPAID'}</span>
+        </div>
+        ${inv.terms?`<div style="border-top:1px solid #ddd;padding-top:12px"><p style="margin:0 0 4px;font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.5px">Terms &amp; instructions</p><p style="margin:0;font-size:12px;color:#555;white-space:pre-wrap">${inv.terms}</p></div>`:''}
+      </div>
+    `;
+    document.getElementById('back-btn').onclick = ()=>{ renderList(); switchTab('list'); };
+    document.getElementById('print-btn').onclick = ()=>{ window.print(); };
+  }
+
+  // ---------- DASHBOARD ----------
+  let dashChart = null;
+  function renderDash(){
+    const el = document.getElementById('view-dash');
+    const totalInvoiced = invoices.reduce((s,i)=>s+i.grandTotal,0);
+    const paid = invoices.filter(i=>i.status==='paid');
+    const unpaid = invoices.filter(i=>i.status!=='paid');
+    const paidTotal = paid.reduce((s,i)=>s+i.grandTotal,0);
+    const unpaidTotal = unpaid.reduce((s,i)=>s+i.grandTotal,0);
+
+    const monthMap = {};
+    invoices.forEach(inv=>{
+      const d = new Date(inv.date);
+      if(isNaN(d)) return;
+      const key = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+      monthMap[key] = (monthMap[key]||0) + inv.grandTotal;
+    });
+    const months = Object.keys(monthMap).sort();
+    const monthLabels = months.map(m=>{
+      const [y,mo] = m.split('-');
+      return new Date(y, mo-1, 1).toLocaleDateString(undefined,{month:'short', year:'2-digit'});
+    });
+    const monthValues = months.map(m=>monthMap[m]);
+
+    const recent = invoices.slice(0,5);
+
+    el.innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px">
+        <div class="metric-card">
+          <p class="metric-label">Total invoiced</p>
+          <p class="metric-value">${fmtK(totalInvoiced)}</p>
+        </div>
+        <div class="metric-card">
+          <p class="metric-label">Paid (${paid.length})</p>
+          <p class="metric-value" style="color:var(--text-success)">${fmtK(paidTotal)}</p>
+        </div>
+        <div class="metric-card">
+          <p class="metric-label">Unpaid (${unpaid.length})</p>
+          <p class="metric-value" style="color:var(--text-warning)">${fmtK(unpaidTotal)}</p>
+        </div>
+        <div class="metric-card">
+          <p class="metric-label">Invoices</p>
+          <p class="metric-value">${invoices.length}</p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:24px">
+        <p style="font-size:14px;font-weight:500;margin:0 0 10px">Monthly invoiced amount</p>
+        ${monthValues.length ? '<div style="position:relative;height:220px"><canvas id="month-chart"></canvas></div>' : '<p style="font-size:13px;color:var(--text-secondary)">No data yet.</p>'}
+      </div>
+
+      <div class="card">
+        <p style="font-size:14px;font-weight:500;margin:0 0 10px">Recent invoices</p>
+        ${recent.length===0 ? '<p style="font-size:13px;color:var(--text-secondary)">No invoices yet.</p>' :
+        recent.map(inv=>`
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border-tertiary)">
+            <div>
+              <p style="margin:0;font-size:13px;font-weight:500">Invoice ${inv.invoiceNo} &middot; ${inv.client}</p>
+              <p style="margin:2px 0 0;font-size:12px;color:var(--text-secondary)">${fmtDate(inv.date)}</p>
+            </div>
+            <div style="text-align:right">
+              <p style="margin:0;font-size:13px;font-weight:500">${fmtK(inv.grandTotal)}</p>
+              <p style="margin:2px 0 0;font-size:11px;color:${inv.status==='paid'?'var(--text-success)':'var(--text-warning)'}">${inv.status==='paid'?'Paid':'Unpaid'}</p>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+
+    if(monthValues.length && window.Chart){
+      const ctx = document.getElementById('month-chart');
+      if(dashChart) dashChart.destroy();
+      dashChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: monthLabels,
+          datasets: [{
+            label: 'Invoiced (K)',
+            data: monthValues.map(v=>Math.round(v*100)/100),
+            backgroundColor: '#7F77DD',
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { callback: v => 'K'+v.toLocaleString() } }
+          }
+        }
+      });
+    }
+  }
+
+  // init
+  loadAll();
+  renderCreate();
+})();
+</script>
+</body>
+</html>
