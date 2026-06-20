@@ -163,6 +163,98 @@
     background:#fff;
     color:#1a1a1a;
   }
+
+  /* Line item rows */
+  .line-header-row{
+    display:grid;
+    grid-template-columns:1fr 90px 110px 110px 32px;
+    gap:8px;
+    font-size:12px;
+    color:var(--text-secondary);
+    margin-bottom:6px;
+  }
+  .line-row{
+    display:grid;
+    grid-template-columns:1fr 90px 110px 110px 32px;
+    gap:8px;
+    margin-bottom:6px;
+    align-items:center;
+  }
+  .line-row .ln-total{
+    display:flex;
+    align-items:center;
+    font-size:14px;
+    padding:0 4px;
+  }
+  .line-row .ln-remove{
+    padding:0;
+    width:32px;
+    height:32px;
+    min-width:32px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  @media (max-width:560px){
+    #app-shell{ padding:16px 10px 48px; }
+    .card{ padding:14px; }
+    .field-grid-2col{ grid-template-columns:1fr !important; }
+    .line-header-row{ display:none; }
+    .line-row{
+      grid-template-columns:1fr;
+      grid-template-areas:
+        "desc"
+        "rate"
+        "unit"
+        "total";
+      gap:6px;
+      background:var(--bg-secondary);
+      border-radius:var(--radius-md);
+      padding:10px;
+      margin-bottom:10px;
+      position:relative;
+    }
+    .line-row .ln-desc{ grid-area:desc; }
+    .line-row .ln-rate-wrap{ grid-area:rate; }
+    .line-row .ln-unit-wrap{ grid-area:unit; }
+    .line-row .ln-total-wrap{ grid-area:total; }
+    .line-row .ln-rate-wrap,
+    .line-row .ln-unit-wrap,
+    .line-row .ln-total-wrap{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+    }
+    .line-row .ln-rate-wrap label,
+    .line-row .ln-unit-wrap label,
+    .line-row .ln-total-wrap label{
+      font-size:12px;
+      color:var(--text-secondary);
+      flex-shrink:0;
+    }
+    .line-row .ln-rate-wrap input,
+    .line-row .ln-unit-wrap input{
+      max-width:140px;
+    }
+    .line-row .ln-total{
+      font-weight:500;
+      justify-content:flex-end;
+      flex:1;
+    }
+    .line-row .ln-remove{
+      position:absolute;
+      top:6px;
+      right:6px;
+      background:var(--bg-primary);
+      border-radius:50%;
+      width:28px;
+      height:28px;
+      min-width:28px;
+    }
+  }
+
   @media print{
     body *{ visibility:hidden; }
     #printable, #printable *{ visibility:visible; }
@@ -256,7 +348,7 @@
     const el = document.getElementById('view-create');
     el.innerHTML = `
       <div class="card">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+        <div class="field-grid-2col" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
           <div>
             <label class="field-label">Client name</label>
             <input id="f-client" type="text" placeholder="MR KENNEDY CHIYANDA">
@@ -284,7 +376,7 @@
         </div>
 
         <div style="border-top:1px solid var(--border-tertiary);padding-top:14px;margin-bottom:8px">
-          <div style="display:grid;grid-template-columns:1fr 90px 110px 110px 32px;gap:8px;font-size:12px;color:var(--text-secondary);margin-bottom:6px">
+          <div class="line-header-row">
             <div>Description</div><div>Rate</div><div>Unit price K</div><div>Total K</div><div></div>
           </div>
           <div id="lines-container"></div>
@@ -323,12 +415,12 @@
   function renderLines(){
     const c = document.getElementById('lines-container');
     c.innerHTML = draftLines.map(line=>`
-      <div style="display:grid;grid-template-columns:1fr 90px 110px 110px 32px;gap:8px;margin-bottom:6px" data-row="${line.id}">
+      <div class="line-row" data-row="${line.id}">
         <input type="text" class="ln-desc" data-id="${line.id}" value="${line.desc.replace(/"/g,'&quot;')}" placeholder="Item description">
-        <input type="number" class="ln-rate" data-id="${line.id}" value="${line.rate}" step="any">
-        <input type="number" class="ln-unit" data-id="${line.id}" value="${line.unit}" step="any">
-        <div style="display:flex;align-items:center;font-size:14px;padding:0 4px" class="ln-total">${fmtK(calcLineTotal(line))}</div>
-        <button class="ln-remove" data-id="${line.id}" aria-label="Remove line" style="padding:0;width:32px;height:32px;display:flex;align-items:center;justify-content:center"><i class="ti ti-x" style="font-size:14px" aria-hidden="true"></i></button>
+        <div class="ln-rate-wrap"><label>Rate</label><input type="number" class="ln-rate" data-id="${line.id}" value="${line.rate}" step="any"></div>
+        <div class="ln-unit-wrap"><label>Unit price K</label><input type="number" class="ln-unit" data-id="${line.id}" value="${line.unit}" step="any"></div>
+        <div class="ln-total-wrap"><label>Total K</label><div class="ln-total">${fmtK(calcLineTotal(line))}</div></div>
+        <button class="ln-remove" data-id="${line.id}" aria-label="Remove line"><i class="ti ti-x" style="font-size:14px" aria-hidden="true"></i></button>
       </div>
     `).join('');
 
