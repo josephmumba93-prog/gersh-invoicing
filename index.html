@@ -141,6 +141,14 @@
     font-weight:500;
     margin:0;
   }
+  .view-btn, .del-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:34px;
+    height:34px;
+    padding:0;
+  }
   .status-pill{
     font-size:12px;
     padding:5px 10px;
@@ -286,6 +294,7 @@
 (function(){
   const COMPANY = {
     name: "GERSH ELITE MOTORS LTD",
+    tpin: "2004461168",
     address: "55 road Makeni, Lusaka",
     phone: "+260978990389",
     email: "sirgershom8@gmail.com"
@@ -420,7 +429,7 @@
         <div class="ln-rate-wrap"><label>Rate</label><input type="number" class="ln-rate" data-id="${line.id}" value="${line.rate}" step="any"></div>
         <div class="ln-unit-wrap"><label>Unit price K</label><input type="number" class="ln-unit" data-id="${line.id}" value="${line.unit}" step="any"></div>
         <div class="ln-total-wrap"><label>Total K</label><div class="ln-total">${fmtK(calcLineTotal(line))}</div></div>
-        <button class="ln-remove" data-id="${line.id}" aria-label="Remove line"><i class="ti ti-x" style="font-size:14px" aria-hidden="true"></i></button>
+        <button class="ln-remove" data-id="${line.id}" aria-label="Remove line"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
       </div>
     `).join('');
 
@@ -495,8 +504,8 @@
             </div>
             <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
               <button class="status-pill ${inv.status}" data-id="${inv.id}">${inv.status==='paid'?'Paid':'Unpaid'}</button>
-              <button class="view-btn" data-id="${inv.id}" aria-label="View invoice"><i class="ti ti-eye" style="font-size:15px;vertical-align:-2px" aria-hidden="true"></i></button>
-              <button class="del-btn" data-id="${inv.id}" aria-label="Delete invoice"><i class="ti ti-trash" style="font-size:15px;vertical-align:-2px" aria-hidden="true"></i></button>
+              <button class="view-btn" data-id="${inv.id}" aria-label="View invoice"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+              <button class="del-btn" data-id="${inv.id}" aria-label="Delete invoice"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg></button>
             </div>
           </div>
         `).join('')}
@@ -536,6 +545,7 @@
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px">
           <div>
             <h2 style="margin:0 0 6px;font-size:20px;font-weight:500;color:#1a1a1a">${COMPANY.name}</h2>
+            <p style="margin:0 0 4px;font-size:12px;color:#555">TPIN number: ${COMPANY.tpin}</p>
             <p style="margin:0;font-size:12px;color:#555">${COMPANY.address}</p>
             <p style="margin:0;font-size:12px;color:#555">${COMPANY.phone}</p>
             <p style="margin:0;font-size:12px;color:#555">${COMPANY.email}</p>
